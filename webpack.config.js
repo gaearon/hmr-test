@@ -1,12 +1,35 @@
 import webpack from 'webpack'
 import path from 'path'
 
+const env = process.env.NODE_ENV
+
+let entry = [
+  path.join(__dirname, 'modules', 'client.js')
+]
+
+let plugins = [
+  new webpack.DefinePlugin({
+    'process.env.NODE_ENV': JSON.stringify(env)
+  })
+]
+
+if (env !== 'production') {
+  entry = [
+    ...entry,
+    'webpack-dev-server/client?http://localhost:8080',
+    'webpack/hot/only-dev-server'
+  ]
+  plugins = [
+    ...plugins,
+    new webpack.HotModuleReplacementPlugin()
+  ]
+}
+
 export default {
 
-  entry: [
-    'webpack-dev-server/client?http://localhost:8080',
-    path.join(__dirname, 'modules', 'client.js')
-  ],
+  entry,
+
+  plugins,
 
   output: {
     path: path.join(__dirname, '.build'),
@@ -35,12 +58,6 @@ export default {
       }
     ]
   },
-
-  plugins: [
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
-    })
-  ],
 
   devServer: {
     hot: true,
